@@ -1,0 +1,87 @@
+services:
+  database:
+    container_name: bidaro-database
+    image: postgres:latest
+    volumes:
+      - bidaro-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "${PG_PORT}:5432"
+    networks:
+      - bidaro-network
+
+  minio:
+    container_name: bidaro-minio
+    image: bitnami/minio:latest
+    volumes:
+      - bidaro-minio-data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_DEFAULT_BUCKETS: ${MINIO_DEFAULT_BUCKETS}
+    ports:
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - bidaro-network
+
+  redis:
+    container_name: bidaro-redis
+    image: redis:latest
+    volumes:
+      - bidaro-redis-data:/root/redis
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+      REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - bidaro-network
+
+  mailhog:
+    container_name: bidaro-mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - "${MAILHOG_PORT}:1025"
+      - "${MAILHOG_UI_PORT}:8025"
+    networks:
+      - bidaro-network
+
+  redis-ui:
+    container_name: bidaro-redis-ui
+    image: rediscommander/redis-commander:latest
+    hostname: redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "${REDIS_UI_PORT}:8081"
+    networks:
+      - bidaro-network
+
+  database-ui:
+    container_name: bidaro-database-ui
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+    ports:
+      - "${ADMINER_UI_PORT}:8080"
+    networks:
+      - bidaro-network
+
+networks:
+  bidaro-network:
+    name: bidaro-network
+    driver: bridge
+
+volumes:
+  bidaro-db-data:
+  bidaro-redis-data:
+  bidaro-minio-data:

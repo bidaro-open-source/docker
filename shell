@@ -1,0 +1,33 @@
+#!/bin/bash
+
+export USER_UID=$(id -u)
+export USER_GID=$(id -g)
+
+case "$1" in
+  list) docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}\t{{.Status}}" $2;;
+
+  start) docker-compose up $2 ;;
+
+  stop) docker-compose down $2 ;;
+
+  restart) docker-compose restart $2 ;;
+
+  rebuild) docker-compose build $2 ;;
+
+  *)
+    echo "Usage: sh shell [COMMANDS] [FLAGS]"
+    echo ""
+    echo "Aliases for docker-compose."
+    echo ""
+    echo "Commands:"
+    echo "  list              List of running containers."
+    echo "  start             Up all containers."
+    echo "    -d                - run containers in background."
+    echo "    --build           - build containers before running."
+    echo "  stop              Down all containers."
+    echo "  restart           Restart all containers."
+    echo "  rebuild           Rebuild all containers."
+    echo "    --no-cache         - rebuild containers without cache."
+    echo ""
+  ;;
+esac
