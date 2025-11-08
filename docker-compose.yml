@@ -15,7 +15,7 @@ services:
 
   minio:
     container_name: bidaro-minio
-    image: bitnami/minio:latest
+    image: bitnamilegacy/minio:latest
     volumes:
       - bidaro-minio-data:/data
     environment:
