@@ -76,6 +76,67 @@ services:
     networks:
       - bidaro-network
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-config.yaml"]
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otel-config.yaml
+    ports:
+      - "4317:4317"
+      - "8889:8889"
+    networks:
+      - bidaro-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - bidaro-network
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+    networks:
+      - bidaro-network
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - bidaro-network
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ../bidaro/logs:/var/log/app_logs:ro
+      - ./config/promtail.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - bidaro-network
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - "3010:3000"
+    volumes:
+      - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    networks:
+      - bidaro-network
+
 networks:
   bidaro-network:
     name: bidaro-network
@@ -85,3 +146,7 @@ volumes:
   bidaro-db-data:
   bidaro-redis-data:
   bidaro-minio-data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:

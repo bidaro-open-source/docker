@@ -16,3 +16,4 @@ logs
 auction-db-data
 auction-redis-data
 auction-minio-data
+data
