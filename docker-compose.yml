@@ -15,7 +15,7 @@ services:
 
   minio:
     container_name: bidaro-minio
-    image: bitnamilegacy/minio:latest
+    image: bitnamilegacy/minio:2025.4.22-debian-12-r1
     volumes:
       - bidaro-minio-data:/data
     environment:
