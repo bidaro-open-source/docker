@@ -77,17 +77,18 @@ services:
       - bidaro-network
 
   otel-collector:
+    container_name: bidaro-otel-collector
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel-config.yaml"]
     volumes:
       - ./config/otel-collector.yaml:/etc/otel-config.yaml
     ports:
-      - "4317:4317"
-      - "8889:8889"
+      - "${OTEL_COLLECTOR_PORT}:4317"
     networks:
       - bidaro-network
 
   prometheus:
+    container_name: bidaro-prometheus
     image: prom/prometheus:latest
     command: [ "--config.file=/etc/prometheus/prometheus.yml" ]
     volumes:
@@ -96,6 +97,7 @@ services:
       - bidaro-network
 
   tempo:
+    container_name: bidaro-tempo
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
@@ -104,20 +106,24 @@ services:
       - bidaro-network
 
   loki:
+    container_name: bidaro-loki
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - bidaro-network
 
   grafana:
+    container_name: bidaro-grafana
     image: grafana/grafana:latest
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     ports:
-      - "3010:3000"
+      - "${GRAPHANA_PORT}:3000"
     volumes:
-      - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     networks:
       - bidaro-network
 
@@ -130,7 +136,3 @@ volumes:
   bidaro-db-data:
   bidaro-redis-data:
   bidaro-minio-data:
-  prometheus_data:
-  loki_data:
-  tempo_data:
-  grafana_data:
